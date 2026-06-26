@@ -1,0 +1,84 @@
+   
+This document contains proprietary information of Qtech Business Solutions, Inc intended for internal use by authorized personnel only, in accordance with company information security and document 
+control policies. Unauthorized disclosure, reproduction, or use of this document, in whole or in part, is strictly prohibited  without prior  written authorization.  
+ 
+ TASK SPECIFICATION 
+DOCUMENT  
+L3 B4 Birch St. Lovely Meadows, Calmar Homes, Tayabas City, Quezon , Philippines  0917 560 3284  wecare@qtechbsi.com  
+ Project  qTASK   Document No  OJT00 2 
+Module  Master Task Monitoring   Document Date  June 24, 2026  
+ (with Advance Multi -Filter Reports)   Target Date   
+   Prepared By  Erica Dane Gutierrez  
+     
+ 
+I. Objective  
+The objective of this task is to implement a robust, tabular Master Monitoring Grid Module  inside qTASK. This module will 
+aggregate data across all 15 system phases into a single comprehensive table, equipping project managers with multi -
+column filtering capabilities to generate instant progress and target -date tracking reports.  
+ 
+ 
+II. Specifications  
+A. Frontend & User Interface (UI) Requirements  
+The OJT team must construct a clean, highly scannable tabular grid view based on the layout and filtering paradigms 
+found in advanced tracking systems:  
+ 
+A. Core Monitoring Table Columns  
+The data grid must present a flat table structure featuring the exact columns below:  
+1. Project:  Name of the parent project (e.g., BANNER , NOVO , etc.).  
+2. Task Title:  The full descriptive name of the task block.  
+3. Phase:  The current step out of the 15 pipeline phases (e.g., In Progress , QA Testing , etc.).  
+4. Severity:  The priority level of the task card (e.g., CRITICAL / SHOWSTOPPER , HIGH , MEDIUM ). 
+5. Status:  The current health state of the activity (e.g., Active , Blocked , Bug Fixing , Passed ). 
+6. Assignee:  The full name and avatar badge of the assigned OJT member.  
+7. Target Date:  The definitive deadline date stamped on the task card.  
+8. Progress:  A completion metric displaying either a percentage tracker or checklist ratio (e.g., 8/10 or 80%).  
+ 
+B. Live Multi -Filter Control Strip  
+Directly above the monitoring table, a unified control bar must feature separate dropdown filter selectors for each  
+column:  
+• [ Filter by Project: ALL v ]  
+• [ Filter by Assignee: ALL v ]  
+• [ Filter by Status: ALL v ]  
+• [ Filter by Phase: ALL v ]  
+
+   
+This document contains proprietary information of Qtech Business Solutions, Inc intended for internal use by authorized personnel only, in accordance with company information security and document 
+control policies. Unauthorized disclosure, reproduction, or use of this document, in whole or in part, is strictly prohibited  without prior  written authorization.  
+ 
+ TASK SPECIFICATION 
+DOCUMENT  
+L3 B4 Birch St. Lovely Meadows, Calmar Homes, Tayabas City, Quezon , Philippines  0917 560 3284  wecare@qtechbsi.com  
+• [ Filter by Severity: ALL v ]  
+• [ Filter by Target Date: Range Picker v ] (Allows selecting specific dates, months, or "Past Due" conditions).  
+ 
+ 
+B. Backend Mapping & Logic R ules  
+The data pipeline must be heavily optimized to handle dynamic multi -variable query payloads sent by the frontend 
+filter bar:  
+• Dynamic WHERE Clause Consolidation:  The backend API endpoint must dynamically construct its relational 
+database search query based only on the parameters actively modified by the user.  
+SQL  Logic  Sample:  𝚂𝙴𝙻𝙴𝙲𝚃  ∗ 𝙵𝚁𝙾𝙼  𝚝𝚊𝚜𝚔𝚜  𝚆𝙷𝙴𝚁𝙴  (𝚙𝚛𝚘𝚓𝚎𝚌𝚝 _𝚒𝚍 = 𝚇 𝙾𝚁 𝙰𝙻𝙻) 𝙰𝙽𝙳  (𝚊𝚜𝚜𝚒𝚐𝚗𝚎𝚎 _𝚒𝚍 = 𝚈 𝙾𝚁 𝙰𝙻𝙻) ... 
+ 
+• Target Date Evaluation:  Provide specific date -parsing parameters to easily extract and filter tasks that are 
+overdue against the system's runtime date clock.  
+ 
+ 
+C. Technical Stack Recommendations  
+• Frontend Grid Libraries:  It is strongly recommended to use a data grid package like AG Grid (Community 
+Edition) , TanStack Table (React Table) , or standard Bootstrap DataTables . These libraries come out -of-the-
+box with built -in multi -column sorting, row filtering, and pagination styles.  
+• Export Component:  Add a simple [ Export to Excel / CSV ] utility button next to the filter controls to let managers 
+download their filtered monitoring snapshots instantly.  
+ 
+ 
+III. Definition of Done (DoD)  
+This module shall be considered officially complete when:  
+1. The grid properly pulls and correctly populates all 8 mandated columns from the main tasks database.  
+2. Combining multiple filter selections concurrently (e.g., Project: BANNER  + Status: Blocked  + Severity: Critical ) yields 
+instant, mathematically accurate row results.  
+3. Clicking column headers correctly triggers descending and ascending rows sorting sequences.  
+4. The overall text padding, row layout separators, and filter dropdown actions mirror the professional and fast filtering 
+interface found in TickTick.  
+ 
+ 
+ 

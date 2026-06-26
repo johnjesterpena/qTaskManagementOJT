@@ -1,0 +1,78 @@
+@import 'tailwindcss';
+
+/* ── QTECH System Theme ─────────────────────────────────────────
+   Primary Brand  #0078D7  focus rings, primary buttons, links
+   Primary Dark   #1C61A1  main headers, section titles
+   Primary Deep   #20476E  sidebar, dark surfaces
+   Surface/Base   #FFFFFF  cards, table rows, inputs
+   Alt Row        #F0F8FF  zebra-stripe alternate rows
+   Borders        #DCDCDC  grid lines, input borders, dividers
+──────────────────────────────────────────────────────────────── */
+:root {
+  --brand:        #0078D7;
+  --brand-dark:   #1C61A1;
+  --brand-deep:   #20476E;
+  --surface:      #FFFFFF;
+  --row-alt:      #F0F8FF;
+  --border:       #DCDCDC;
+  --text-primary: #1a2332;
+  --text-muted:   #4f6070;
+}
+
+/* ── Fluid responsive typography ───────────────────────────────
+   clamp(min, preferred, max)
+   Viewport range: 768px (tablet) → 1440px (desktop)
+   Formula: min + (max - min) * (100vw - 768px) / (1440 - 768)
+   All hard-coded px font sizes in JSX are REPLACED by these
+   CSS custom properties so everything scales fluidly.
+──────────────────────────────────────────────────────────────── */
+:root {
+  /* Step 0 — micro labels, badges, timestamps            9px  → 10px  */
+  --fs-xs:   clamp(0.5625rem, 0.4955rem + 0.2232vw, 0.625rem);
+
+  /* Step 1 — body copy, table cells, subtitles           11px → 13px  */
+  --fs-sm:   clamp(0.6875rem, 0.5878rem + 0.3304vw, 0.8125rem);
+
+  /* Step 2 — card titles, form labels, nav items         13px → 15px  */
+  --fs-base: clamp(0.8125rem, 0.7009rem + 0.3720vw, 0.9375rem);
+
+  /* Step 3 — section headings, modal titles              16px → 19px  */
+  --fs-lg:   clamp(1rem,    0.8661rem + 0.4464vw, 1.1875rem);
+
+  /* Step 4 — page titles (h1)                            20px → 26px  */
+  --fs-xl:   clamp(1.25rem, 1.0268rem + 0.7440vw, 1.625rem);
+
+  /* Step 5 — hero / KPI numbers                          28px → 36px  */
+  --fs-2xl:  clamp(1.75rem, 1.5268rem + 0.7440vw, 2.25rem);
+}
+
+/* ── Apply fluid base font-size to the whole app ────────────────── */
+html {
+  /* The html font-size drives all rem units; this ensures
+     Tailwind’s rem-based classes (text-xs, text-sm …) also scale. */
+  font-size: clamp(14px, 1.1vw + 10px, 16px);
+}
+
+body {
+  font-family: 'DM Sans', 'Segoe UI', system-ui, sans-serif;
+  background: #f5f9fe;
+  color: var(--text-primary);
+}
+
+/* ── Utility helpers usable anywhere with style={{}} ─────────────── */
+/* These map the semantic steps to concrete sizes, making JSX
+   inline-styles easy: style={{ fontSize: 'var(--fs-sm)' }}    */
+
+/* ── Table zebra stripe helper ─────────────────────────────────── */
+.qt-table tbody tr:nth-child(even) { background: var(--row-alt); }
+.qt-table tbody tr:nth-child(odd)  { background: var(--surface);  }
+.qt-table thead tr                 { background: var(--brand-deep); color: #fff; }
+.qt-table th, .qt-table td        { border-bottom: 1px solid var(--border); padding: 10px 20px; font-size: var(--fs-sm); }
+.qt-table th                      { font-size: var(--fs-xs); font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; }
+
+/* ── Brand input focus ring ────────────────────────────────────── */
+input:focus, select:focus, textarea:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(0, 120, 215, 0.25);
+  border-color: var(--brand) !important;
+}

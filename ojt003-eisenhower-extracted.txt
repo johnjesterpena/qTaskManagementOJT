@@ -1,0 +1,105 @@
+   
+This document contains proprietary information of Qtech Business Solutions, Inc intended for internal use by authorized personnel only, in accordance with company information security and document 
+control policies. Unauthorized disclosure, reproduction, or use of this document, in whole or in part, is strictly prohibited  without prior  written authorization.  
+ 
+ TASK SPECIFICATION 
+DOCUMENT  
+L3 B4 Birch St. Lovely Meadows, Calmar Homes, Tayabas City, Quezon , Philippines  0917 560 3284  wecare@qtechbsi.com  
+ Project  qTASK   Document No  OJT00 3 
+Module  Eisenhower Decision Matrix   Document Date  June 24, 2026  
+ (Urgent vs. Important Prioritization View)   Target Date   
+   Prepared By  Erica Dane Gutierrez  
+     
+ 
+I. Objective  
+The objective of this task is to implement an interactive Eisenhower Matrix Module  within qTASK, referencing the UI/UX 
+layout of TickTick. This feature will automatically map and display tasks into four distinct quadrants based on their urgency  
+(Target Date) and importance (Severity), allowing users to immediately identify high -priority  work.  
+ 
+ 
+II. Specifications  
+A. Frontend & User Interface (UI) Requirements  
+The OJT team must build a new tab view titled "Eisenhower Matrix" that splits the screen into a $2 \times 2$ Grid 
+Interface . 
+ 
+A. The 4 Quadrants Layout  
+1. Quadrant I: Urgent & Important (Do First) [Top -Left]:  For tasks requiring immediate action.  
+2. Quadrant II: Not Urgent  & Important (Schedule) [Top -Right]:  For long -term goals and strategic planning.  
+3. Quadrant III: Urgent & Not Important (Delegate) [Bottom -Left]:  For operational tasks that need quick 
+completion but low complexity.  
+4. Quadrant IV: Not Urgent & Not Important (Eliminate) [Bottom -Right]:  For low -priority backlog tasks.  
+ 
+B. View Controls & Filtering Strip  
+Directly above the 2 x 2 grid, include a control bar similar to the Master Grid to adjust the scope of the matrix view:  
+• [ Select Project: ALL / Specific v ]  
+• [ Select Assignee: ALL / Specific v ] (Allows PMs to see the matrix of individual OJTs, or allows devs to look at their 
+own matrix).  
+ 
+ 
+ 
+ 
+ 
+ 
+
+   
+This document contains proprietary information of Qtech Business Solutions, Inc intended for internal use by authorized personnel only, in accordance with company information security and document 
+control policies. Unauthorized disclosure, reproduction, or use of this document, in whole or in part, is strictly prohibited  without prior  written authorization.  
+ 
+ TASK SPECIFICATION 
+DOCUMENT  
+L3 B4 Birch St. Lovely Meadows, Calmar Homes, Tayabas City, Quezon , Philippines  0917 560 3284  wecare@qtechbsi.com  
+B. Backend Mapping & Logic Rules  
+To prevent users from having to manually assign quadrants, the system must automatically categorize tasks  by 
+cross -referencing two existing database parameters: Severity  (Importance) and Target Date  (Urgency).  
+ 
+The backend API must filter and distribute tasks using the following matrix logic:  
+Quadrant  Importance Condition (Severity)  Urgency Condition (Target Date)  
+Q1: Do First  CRITICAL / SHOWSTOPPER OR HIGH  Due Today, Past Due, or Due within 48 Hours  
+Q2: Schedule  CRITICAL / SHOWSTOPPER OR HIGH  Due later than 48 Hours / No immediate deadline  
+Q3: Delegate  MEDIUM OR LOW  Due Today, Past Due, or Due within 48 Hours  
+Q4: Eliminate  MEDIUM OR LOW  No immediate deadline / Long -term Backlog  
+ 
+ 
+ 
+C. Technical Stack Recommendations  
+• CSS Grid / Flexbox:  Utilize modern CSS Grid layouts to ensure the 2 x 2 quadrant split remains fully responsive 
+across screens.  
+• Drag -and -Drop API:  Use lightweight sorting libraries like vuedraggable , react -beautiful -dnd , or SortableJS  
+(depending on qTASK's frontend stack) to manage card moving between the quadrants cleanly.  
+ 
+ 
+III. Layout Reference  
+The development team may  study and closely emulate TickTick’s Eisenhower Matrix layout  to guide their 
+implementation:  🎯 Eisenhower Matrix  
+• Quadrants Grid Symmetry:  Follow TickTick’s minimalist $2 \times 2$ box layout. Each quadrant must have its own 
+scrollbar so a high volume of tasks doesn't break the uniform sizing of the screen grid.  
+• Drag -and -Drop Matrix Adjustments:  Copy TickTick's drag mechanics. If a PM or developer drags a task card out of 
+Quadrant II (Schedule)  and drops it into Quadrant I (Do First) , the system must automatically update that task's 
+database record (e.g., automatically bumping its Severity to HIGH or moving its Target Date to Today).  
+• Quick -Add Field per Quadrant:  Emulate TickTick's input field located inside or at the top of each individual quadrant 
+box, allowing a manager to rapidly type a task name and hit Enter to create a task pre -mapped directly to that 
+quadrant.  
+ 
+ 
+ 
+ 
+
+   
+This document contains proprietary information of Qtech Business Solutions, Inc intended for internal use by authorized personnel only, in accordance with company information security and document 
+control policies. Unauthorized disclosure, reproduction, or use of this document, in whole or in part, is strictly prohibited  without prior  written authorization.  
+ 
+ TASK SPECIFICATION 
+DOCUMENT  
+L3 B4 Birch St. Lovely Meadows, Calmar Homes, Tayabas City, Quezon , Philippines  0917 560 3284  wecare@qtechbsi.com  
+IV. Definition of Done (DoD)  
+This module shall be considered officially complete when:  
+1. The Eisenhower Matrix splits cleanly into 4 uniform, scrollable quadrants.  
+2. Tasks from the database are accurately mapped into their respective quadrants based on the Severity and Target Date 
+logic table.  
+3. Manually dragging a task from one quadrant to another successfully mutates and saves the new Severity/Target Date 
+payload in the database.  
+4. The matrix layout, text font density, and quadrant colors perfectly match the polished efficiency of TickTick's 
+prioritization matrix view.  
+ 
+ 
+ 
