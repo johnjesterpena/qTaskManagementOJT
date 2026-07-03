@@ -22,7 +22,8 @@ namespace QtechOJT_Net9.Models
         public User? PM { get; set; } = null!;
 
         public required DateTime CreatedDate { get; set; } = DateTime.Now;
-        public DateTime TargetEndDate { get; set; }
+        public required DateTime StartDate { get; set; }
+        public required DateTime TargetEndDate { get; set; }
 
         public ICollection<Main_Task> Main_Tasks { get; set; } = [];
 

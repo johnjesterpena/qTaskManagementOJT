@@ -6,7 +6,8 @@
         public string Title { get; init; } = string.Empty;
         public string? Description { get; init; }
         public string? ClientName { get; init; }
-        public DateTime? TargetEndDate { get; init; }
+        public DateTime StartDate { get; init; }
+        public DateTime TargetEndDate { get; init; }
         public string? Status { get; init; }
         public DateTime CreatedAt { get; init; }
         public int? PmId { get; init; }

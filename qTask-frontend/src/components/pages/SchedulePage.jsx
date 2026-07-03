@@ -7,7 +7,7 @@ import {
   List,
   Repeat2,
 } from "lucide-react";
-import { fetchScheduleTasks } from "../../services/api";
+import { fetchScheduleTasks, fetchScheduleProjects } from "../../services/api";
 
 const VIEWS = [
   { key: "day", label: "Day" },
@@ -94,10 +94,26 @@ function eventTouchesDay(event, day) {
   return start <= target && end >= target;
 }
 
-function EventBar({ event, showProjectPrefix, dense = false }) {
+function EventBar({ event, showProjectPrefix, dense = false, currentDay = null }) {
   const bg = event.isOverdue ? T.danger : event.statusColor || T.brand;
   const assignees = event.assignees ?? [];
   const title = `${showProjectPrefix ? `[${event.projectName}] ` : ""}${event.title}`;
+
+  // For project events, only show title on start or end date
+  const shouldShowTitle = !event.isProjectEvent || 
+    !currentDay ||
+    isSameDay(currentDay, toDate(event.start)) || 
+    isSameDay(currentDay, toDate(event.end));
+
+  // Determine text color for project events: green for start date, red for end date
+  let textColor = event.isOverdue ? T.danger : T.brandDeep;
+  if (event.isProjectEvent && currentDay) {
+    if (isSameDay(currentDay, toDate(event.start))) {
+      textColor = "#16a34a"; // green for start date
+    } else if (isSameDay(currentDay, toDate(event.end))) {
+      textColor = "#dc2626"; // red for end date
+    }
+  }
 
   return (
     <div
@@ -107,7 +123,7 @@ function EventBar({ event, showProjectPrefix, dense = false }) {
         borderRadius: 6,
         background: event.isOverdue ? T.dangerBg : `${bg}18`,
         border: `1px solid ${event.isOverdue ? "#fecaca" : `${bg}55`}`,
-        color: event.isOverdue ? T.danger : T.brandDeep,
+        color: textColor,
         display: "flex",
         alignItems: "center",
         gap: 6,
@@ -127,14 +143,16 @@ function EventBar({ event, showProjectPrefix, dense = false }) {
           flexShrink: 0,
         }}
       />
-      <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-        {showProjectPrefix && (
-          <span style={{ color: event.isOverdue ? T.danger : T.brandDark }}>
-            [{event.projectName}]{" "}
-          </span>
-        )}
-        {event.title}
-      </span>
+      {shouldShowTitle && (
+        <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+          {showProjectPrefix && (
+            <span style={{ color: event.isOverdue ? T.danger : T.brandDark }}>
+              [{event.projectName}]{" "}
+            </span>
+          )}
+          {event.title}
+        </span>
+      )}
       {event.isRecurring && <Repeat2 size={12} style={{ flexShrink: 0 }} />}
       {event.isOverdue && <AlertTriangle size={12} style={{ flexShrink: 0 }} />}
       {assignees.length > 0 && (
@@ -186,8 +204,18 @@ function MonthView({ anchorDate, events, showProjectPrefix }) {
       </div>
       <div style={{ display: "grid", gridTemplateColumns: "repeat(7, minmax(0, 1fr))" }}>
         {days.map((day) => {
-          const dayEvents = events.filter((event) => eventTouchesDay(event, day));
+          const dayEvents = events.filter((event) => {
+            if (!eventTouchesDay(event, day)) return false;
+            // For project events, only show on start or end date
+            if (event.isProjectEvent) {
+              return isSameDay(day, toDate(event.start)) || isSameDay(day, toDate(event.end));
+            }
+            return true;
+          });
           const isCurrentMonth = day.getMonth() === anchorDate.getMonth();
+          const hasProjectEndDate = dayEvents.some(
+            (event) => event.isProjectEvent && isSameDay(day, toDate(event.end))
+          );
           return (
             <div
               key={day.toISOString()}
@@ -198,6 +226,10 @@ function MonthView({ anchorDate, events, showProjectPrefix }) {
                 borderRight: `1px solid ${T.border}`,
                 background: isCurrentMonth ? "#fff" : "#f8fafc",
                 opacity: isCurrentMonth ? 1 : 0.56,
+                ...(hasProjectEndDate && {
+                  animation: "pulse-red 1s ease-in-out infinite",
+                  border: "2px solid #dc2626",
+                }),
               }}
             >
               <div
@@ -218,7 +250,7 @@ function MonthView({ anchorDate, events, showProjectPrefix }) {
               </div>
               <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
                 {dayEvents.slice(0, 3).map((event) => (
-                  <EventBar key={event.id} event={event} showProjectPrefix={showProjectPrefix} dense />
+                  <EventBar key={event.id} event={event} showProjectPrefix={showProjectPrefix} dense currentDay={day} />
                 ))}
                 {dayEvents.length > 3 && (
                   <span style={{ fontSize: "var(--fs-xs)", color: T.muted, fontWeight: 700 }}>
@@ -240,7 +272,14 @@ function WeekView({ anchorDate, events, showProjectPrefix }) {
   return (
     <div style={{ display: "grid", gridTemplateColumns: "repeat(7, minmax(150px, 1fr))", gap: 10, overflowX: "auto" }}>
       {days.map((day) => {
-        const dayEvents = events.filter((event) => eventTouchesDay(event, day));
+        const dayEvents = events.filter((event) => {
+          if (!eventTouchesDay(event, day)) return false;
+          // For project events, only show on start or end date
+          if (event.isProjectEvent) {
+            return isSameDay(day, toDate(event.start)) || isSameDay(day, toDate(event.end));
+          }
+          return true;
+        });
         return (
           <div key={day.toISOString()} style={{ background: "#fff", border: `1px solid ${T.border}`, borderRadius: 8, minHeight: 520, overflow: "hidden" }}>
             <div style={{ padding: "10px 12px", background: "#F0F8FF", borderBottom: `1px solid ${T.border}` }}>
@@ -253,9 +292,24 @@ function WeekView({ anchorDate, events, showProjectPrefix }) {
               {dayEvents.length === 0 ? (
                 <p style={{ color: "#94a3b8", fontSize: "var(--fs-xs)", padding: 8 }}>No activities</p>
               ) : (
-                dayEvents.map((event) => (
-                  <EventBar key={event.id} event={event} showProjectPrefix={showProjectPrefix} />
-                ))
+                dayEvents.map((event) => {
+                  const isProjectEndDate = event.isProjectEvent && isSameDay(day, toDate(event.end));
+                  return (
+                    <div
+                      key={event.id}
+                      style={{
+                        ...(isProjectEndDate && {
+                          animation: "pulse-red 1s ease-in-out infinite",
+                          border: "2px solid #dc2626",
+                          borderRadius: 6,
+                          padding: 2,
+                        }),
+                      }}
+                    >
+                      <EventBar event={event} showProjectPrefix={showProjectPrefix} currentDay={day} />
+                    </div>
+                  );
+                })
               )}
             </div>
           </div>
@@ -266,7 +320,14 @@ function WeekView({ anchorDate, events, showProjectPrefix }) {
 }
 
 function DayView({ anchorDate, events, showProjectPrefix }) {
-  const dayEvents = events.filter((event) => eventTouchesDay(event, anchorDate));
+  const dayEvents = events.filter((event) => {
+    if (!eventTouchesDay(event, anchorDate)) return false;
+    // For project events, only show on start or end date
+    if (event.isProjectEvent) {
+      return isSameDay(anchorDate, toDate(event.start)) || isSameDay(anchorDate, toDate(event.end));
+    }
+    return true;
+  });
 
   return (
     <div style={{ background: "#fff", border: `1px solid ${T.border}`, borderRadius: 8, overflow: "hidden" }}>
@@ -282,9 +343,24 @@ function DayView({ anchorDate, events, showProjectPrefix }) {
                   {dayEvents.length === 0 ? (
                     <p style={{ color: "#94a3b8", fontSize: "var(--fs-sm)" }}>No scheduled activities for this day</p>
                   ) : (
-                    dayEvents.map((event) => (
-                      <EventBar key={event.id} event={event} showProjectPrefix={showProjectPrefix} />
-                    ))
+                    dayEvents.map((event) => {
+                      const isProjectEndDate = event.isProjectEvent && isSameDay(anchorDate, toDate(event.end));
+                      return (
+                        <div
+                          key={event.id}
+                          style={{
+                            ...(isProjectEndDate && {
+                              animation: "pulse-red 1s ease-in-out infinite",
+                              border: "2px solid #dc2626",
+                              borderRadius: 6,
+                              padding: 2,
+                            }),
+                          }}
+                        >
+                          <EventBar event={event} showProjectPrefix={showProjectPrefix} currentDay={anchorDate} />
+                        </div>
+                      );
+                    })
                   )}
                 </div>
               )}
@@ -375,6 +451,26 @@ export default function SchedulePage({ projects }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  // Inject CSS for project event end-date animation
+  useEffect(() => {
+    const styleId = "project-event-animation";
+    if (!document.getElementById(styleId)) {
+      const style = document.createElement("style");
+      style.id = styleId;
+      style.textContent = `
+        @keyframes pulse-red {
+          0%, 100% { opacity: 1; }
+          50%       { opacity: 0.4; }
+        }
+      `;
+      document.head.appendChild(style);
+    }
+    return () => {
+      const existing = document.getElementById(styleId);
+      if (existing) existing.remove();
+    };
+  }, []);
+
   const selectedProjectId = projectId ? Number(projectId) : null;
   const showProjectPrefix = selectedProjectId === null;
 
@@ -385,8 +481,11 @@ export default function SchedulePage({ projects }) {
       setLoading(true);
       setError(null);
       try {
-        const data = await fetchScheduleTasks(selectedProjectId);
-        if (!cancelled) setEvents(data);
+        const [taskData, projectData] = await Promise.all([
+          fetchScheduleTasks(selectedProjectId),
+          fetchScheduleProjects(selectedProjectId),
+        ]);
+        if (!cancelled) setEvents([...projectData, ...taskData]);
       } catch (err) {
         if (!cancelled) setError(err.message);
       } finally {

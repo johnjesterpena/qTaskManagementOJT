@@ -466,27 +466,27 @@ export default function MasterMonitoringPage({
               ) : (
                 filteredTasks.map((task) => (
                   <tr key={task.id}>
-                    <td style={{ color: T.brandDeep, fontWeight: 900, whiteSpace: "nowrap" }}>{task.projectName}</td>
+                    <td style={{ color: T.brandDeep, fontWeight: 500, whiteSpace: "nowrap" }}>{task.projectName}</td>
                     <td style={{ maxWidth: 320 }}>
                       <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                         {task.isOverdue && <AlertTriangle size={14} style={{ color: T.red, flexShrink: 0 }} />}
-                        <span style={{ color: T.brandDeep, fontWeight: 800, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                        <span style={{ color: T.brandDeep, fontWeight: 500, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                           {task.title}
                         </span>
                       </div>
                     </td>
                     <td>
-                      <span style={{ fontSize: "var(--fs-xs)", fontWeight: 800, padding: "3px 8px", borderRadius: 999, background: task.phaseGrouping === "qa" ? "#f5f3ff" : "#eff6ff", color: task.phaseGrouping === "qa" ? "#7c3aed" : T.brandDark }}>
+                      <span style={{ fontSize: "var(--fs-xs)", fontWeight: 500, padding: "3px 8px", borderRadius: 999, background: task.phaseGrouping === "qa" ? "#f5f3ff" : "#eff6ff", color: task.phaseGrouping === "qa" ? "#7c3aed" : T.brandDark }}>
                         {task.phaseLabel}
                       </span>
                     </td>
                     <td>
-                      <span style={{ fontSize: "var(--fs-xs)", fontWeight: 800, padding: "3px 8px", borderRadius: 999, background: `${task.severityColor}18`, color: task.severityColor }}>
+                      <span style={{ fontSize: "var(--fs-xs)", fontWeight: 500, padding: "3px 8px", borderRadius: 999, background: `${task.severityColor}18`, color: task.severityColor }}>
                         {task.severityLabel}
                       </span>
                     </td>
                     <td>
-                      <span style={{ fontSize: "var(--fs-xs)", fontWeight: 800, padding: "3px 8px", borderRadius: 999, background: `${task.statusColor}18`, color: task.statusColor }}>
+                      <span style={{ fontSize: "var(--fs-xs)", fontWeight: 500, padding: "3px 8px", borderRadius: 999, background: `${task.statusColor}18`, color: task.statusColor }}>
                         {task.statusLabel}
                       </span>
                     </td>
@@ -495,10 +495,10 @@ export default function MasterMonitoringPage({
                         <span style={{ width: 26, height: 26, borderRadius: "50%", background: task.qaAssigneeName && !task.assigneeName ? "#7c3aed" : T.brand, color: "#fff", display: "grid", placeItems: "center", fontSize: 10, fontWeight: 900 }}>
                           {initials(assigneeLabel(task)) || "-"}
                         </span>
-                        <span style={{ color: T.brandDeep, fontWeight: 700, whiteSpace: "nowrap" }}>{assigneeLabel(task)}</span>
+                        <span style={{ color: T.brandDeep, fontWeight: 500, whiteSpace: "nowrap" }}>{assigneeLabel(task)}</span>
                       </div>
                     </td>
-                    <td style={{ color: task.isOverdue ? T.red : T.muted, fontWeight: 800, whiteSpace: "nowrap" }}>
+                    <td style={{ color: task.isOverdue ? T.red : T.muted, fontWeight: 500, whiteSpace: "nowrap" }}>
                       {formatDate(task.targetDate)}
                     </td>
                     <td>

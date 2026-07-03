@@ -81,7 +81,8 @@ namespace QtechOJT_Net9.Controllers
                     t.Progress,
                     t.TargetDate.Date < today && t.Status.IsFinal == 0,
                     false,
-                    new List<ScheduleTaskAssigneeDto>()
+                    new List<ScheduleTaskAssigneeDto>(),
+                    false
                 ))
                 .ToListAsync();
 
@@ -121,6 +122,81 @@ namespace QtechOJT_Net9.Controllers
                 .ToList();
 
             return Ok(response);
+        }
+
+        [HttpGet("projects")]
+        public async Task<IActionResult> GetScheduleProjects([FromQuery] int? projectId)
+        {
+            if (!Request.Headers.TryGetValue("x-user-id", out var userIdStr) ||
+                !int.TryParse(userIdStr, out var userId))
+                return Unauthorized(new { message = "User not identified" });
+
+            var user = await _context.Users
+                .AsNoTracking()
+                .Where(u => u.Id == userId && u.IsActive == 1)
+                .Select(u => new { u.Id, u.Role })
+                .FirstOrDefaultAsync();
+
+            if (user is null)
+                return Unauthorized(new { message = "User not found or inactive" });
+
+            var query = _context.Projects.AsQueryable();
+
+            if (user.Role == "Developer")
+            {
+                query = query.Where(p =>
+                    _context.Project_Users.Any(pu =>
+                        pu.ProjectId == p.Id &&
+                        pu.UserId == user.Id &&
+                        pu.Role == "Developer"));
+            }
+            else if (user.Role == "QA")
+            {
+                query = query.Where(p =>
+                    _context.Project_Users.Any(pu =>
+                        pu.ProjectId == p.Id &&
+                        pu.UserId == user.Id &&
+                        pu.Role == "QA"));
+            }
+            else if (user.Role == "ProjectManager")
+            {
+                query = query.Where(p => p.PmId == user.Id);
+            }
+            else if (user.Role != "Admin")
+            {
+                return StatusCode(403, new { message = "Access denied" });
+            }
+
+            if (projectId.HasValue)
+                query = query.Where(p => p.Id == projectId.Value);
+
+            var projectEvents = await query
+                .AsNoTracking()
+                .Where(p => p.TargetEndDate != default(DateTime))
+                .OrderBy(p => p.TargetEndDate)
+                .Select(p => new ScheduleTaskDto(
+                    p.Id * -1,
+                    p.Id,
+                    p.Title,
+                    p.Title,
+                    p.CreatedDate,
+                    p.TargetEndDate,
+                    0,
+                    "Project",
+                    "project",
+                    0,
+                    p.Status,
+                    "#0078D7",
+                    0,
+                    0,
+                    false,
+                    false,
+                    new List<ScheduleTaskAssigneeDto>(),
+                    true
+                ))
+                .ToListAsync();
+
+            return Ok(projectEvents);
         }
     }
 }

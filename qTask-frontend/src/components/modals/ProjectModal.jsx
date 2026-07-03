@@ -62,6 +62,9 @@ export function ProjectFormModal({ project, users, onSave, onClose }) {
     description: project?.description ?? "",
     pmId: project?.pmId ?? "",
     clientName: project?.clientName ?? "",
+    startDate: project?.startDate
+      ? project.startDate.split("T")[0]
+      : "",
     targetEndDate: project?.targetEndDate
       ? project.targetEndDate.split("T")[0]
       : "",
@@ -100,6 +103,10 @@ export function ProjectFormModal({ project, users, onSave, onClose }) {
   const handleSubmit = async () => {
     setError(null);
     if (!form.title.trim()) return setError("Title is required.");
+    if (!form.startDate) return setError("Start Date is required.");
+    if (!form.targetEndDate) return setError("Target End Date is required.");
+    if (form.targetEndDate < form.startDate)
+      return setError("Target End Date must be equal to or after Start Date.");
     try {
       setLoading(true);
       await onSave({
@@ -107,7 +114,8 @@ export function ProjectFormModal({ project, users, onSave, onClose }) {
         description: form.description.trim() || null,
         pmId: form.pmId ? Number(form.pmId) : null,
         clientName: form.clientName.trim() || null,
-        targetEndDate: form.targetEndDate || null,
+        startDate: form.startDate,
+        targetEndDate: form.targetEndDate,
         status: form.status, // <-- Pass Status to API
         developers: form.developers, // Pass selected developer IDs
         qas: form.qas, // Pass selected QA IDs
@@ -229,15 +237,28 @@ export function ProjectFormModal({ project, users, onSave, onClose }) {
           />
         </div>
 
-        <Field label="Target End Date (optional)">
-          <input
-            name="targetEndDate"
-            type="date"
-            value={form.targetEndDate}
-            onChange={handleChange}
-            className={inputClass}
-          />
-        </Field>
+        <div className="grid grid-cols-2 gap-3">
+          <Field label="Start Date *">
+            <input
+              name="startDate"
+              type="date"
+              value={form.startDate}
+              onChange={handleChange}
+              className={inputClass}
+            />
+          </Field>
+
+          <Field label="Target End Date *">
+            <input
+              name="targetEndDate"
+              type="date"
+              value={form.targetEndDate}
+              min={form.startDate || undefined}
+              onChange={handleChange}
+              className={inputClass}
+            />
+          </Field>
+        </div>
 
         <div className="flex justify-end gap-2 pt-2">
           <button onClick={onClose} className={secondaryBtn}>

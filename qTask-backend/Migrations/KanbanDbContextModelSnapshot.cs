@@ -361,6 +361,9 @@ namespace QtechOJT_Net9.Migrations
                     b.Property<int?>("PmId")
                         .HasColumnType("int");
 
+                    b.Property<DateTime>("StartDate")
+                        .HasColumnType("datetime2");
+
                     b.Property<string>("Status")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");

@@ -12,7 +12,9 @@ namespace QtechOJT_Net9.Controllers
     {
         private readonly KanbanDbContext _context = context;
 
-        private static bool IsImportant(int severitySortOrder) => severitySortOrder <= 2;
+        private static bool IsCritical(int severitySortOrder) => severitySortOrder == 1;
+
+        private static bool IsHigh(int severitySortOrder) => severitySortOrder == 2;
 
         private static bool IsUrgent(DateTime targetDate)
         {
@@ -20,20 +22,28 @@ namespace QtechOJT_Net9.Controllers
             return targetDate.Date <= now.Date || targetDate <= now.AddHours(48);
         }
 
+        // Q1 — Critical severity AND urgent (due within 48 h / past due / today)
+        // Q2 — High severity (any target date)
+        // Q3 — Medium or Low severity (any target date)
+        // Q4 — Everything else (Critical but not yet urgent, or unspecified severity)
         private static string GetQuadrant(int severitySortOrder, DateTime targetDate)
         {
-            var important = IsImportant(severitySortOrder);
-            var urgent = IsUrgent(targetDate);
-
-            if (urgent && important) return "q1";
-            if (!urgent && important) return "q2";
-            if (urgent && !important) return "q3";
+            if (IsCritical(severitySortOrder) && IsUrgent(targetDate)) return "q1";
+            if (IsHigh(severitySortOrder)) return "q2";
+            if (severitySortOrder >= 3 && severitySortOrder < 99) return "q3";
             return "q4";
         }
 
         private async Task<(int severityId, DateTime targetDate)> ResolveQuadrantFields(string quadrant)
         {
             var normalized = quadrant.Trim().ToLowerInvariant();
+
+            // SortOrder 1 = Critical, 2 = High, 3 = Medium
+            var criticalSeverity = await _context.Severities
+                .OrderBy(s => s.SortOrder)
+                .FirstOrDefaultAsync(s => s.SortOrder == 1)
+                ?? await _context.Severities.OrderBy(s => s.SortOrder).FirstAsync();
+
             var highSeverity = await _context.Severities
                 .OrderBy(s => s.SortOrder)
                 .FirstOrDefaultAsync(s => s.SortOrder == 2)
@@ -47,12 +57,16 @@ namespace QtechOJT_Net9.Controllers
             var today = DateTime.Today;
             var later = today.AddDays(7);
 
+            // Q1 — Critical + due today (urgent)
+            // Q2 — High severity, target 7 days out (not immediately urgent)
+            // Q3 — Medium severity, target 7 days out
+            // Q4 — Medium severity, further out (low-priority backlog)
             return normalized switch
             {
-                "q1" => (highSeverity.Id, today),
+                "q1" => (criticalSeverity.Id, today),
                 "q2" => (highSeverity.Id, later),
-                "q3" => (mediumSeverity.Id, today),
-                "q4" => (mediumSeverity.Id, later),
+                "q3" => (mediumSeverity.Id, later),
+                "q4" => (mediumSeverity.Id, later.AddDays(7)),
                 _ => throw new ArgumentException("Invalid quadrant")
             };
         }
@@ -162,7 +176,8 @@ namespace QtechOJT_Net9.Controllers
                 .Select(t =>
                 {
                     var urgent = IsUrgent(t.TargetDate);
-                    var important = IsImportant(t.SeveritySortOrder);
+                    var critical = IsCritical(t.SeveritySortOrder);
+                    var important = critical || IsHigh(t.SeveritySortOrder); // Critical or High = important
 
                     return new EisenhowerTaskDto(
                         t.Id,

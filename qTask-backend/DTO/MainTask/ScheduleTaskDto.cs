@@ -23,6 +23,7 @@ namespace QtechOJT_Net9.DTO.MainTask
         int Progress,
         bool IsOverdue,
         bool IsRecurring,
-        List<ScheduleTaskAssigneeDto> Assignees
+        List<ScheduleTaskAssigneeDto> Assignees,
+        bool IsProjectEvent
     );
 }

@@ -25,4 +25,8 @@ export default defineConfig({
     sourcemap: false,
   },
   base: '/',  // Use absolute path (not './')
+  test: {
+    globals: true,
+    environment: 'jsdom',
+  },
 });

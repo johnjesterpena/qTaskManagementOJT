@@ -99,6 +99,13 @@ export const fetchScheduleTasks = (projectId) => {
   return request("GET", `/schedule/tasks${query ? `?${query}` : ""}`);
 };
 
+export const fetchScheduleProjects = (projectId) => {
+  const params = new URLSearchParams();
+  if (projectId) params.append("projectId", projectId);
+  const query = params.toString();
+  return request("GET", `/schedule/projects${query ? `?${query}` : ""}`);
+};
+
 export const fetchEisenhowerTasks = (projectId, assigneeId) => {
   const params = new URLSearchParams();
   if (projectId) params.append("projectId", projectId);

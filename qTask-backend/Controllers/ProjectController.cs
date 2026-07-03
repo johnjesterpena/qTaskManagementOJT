@@ -29,6 +29,7 @@ namespace QtechOJT_Net9.Controllers
                     Title = p.Title,
                     Description = p.Description,
                     ClientName = p.ClientName,
+                    StartDate = p.StartDate,
                     TargetEndDate = p.TargetEndDate,
                     Status = p.Status,
                     CreatedAt = p.CreatedDate,
@@ -92,6 +93,7 @@ namespace QtechOJT_Net9.Controllers
                     Title = p.Title,
                     Description = p.Description,
                     ClientName = p.ClientName,
+                    StartDate = p.StartDate,
                     TargetEndDate = p.TargetEndDate,
                     Status = p.Status,
                     CreatedAt = p.CreatedDate,
@@ -115,9 +117,9 @@ namespace QtechOJT_Net9.Controllers
             if (string.IsNullOrWhiteSpace(req.Title))
                 return BadRequest(new { message = "Title is required" });
 
-            // Todo add guard against setting a date from before .Now
-            if (req.TargetEndDate < DateTime.Now)
-                return BadRequest("Please enter a finish date that is valid.");
+            // Validate that TargetEndDate is >= StartDate
+            if (req.TargetEndDate < req.StartDate)
+                return BadRequest(new { message = "Target End Date must be equal to or after Start Date" });
 
             var project = new Project
             {
@@ -125,7 +127,8 @@ namespace QtechOJT_Net9.Controllers
                 Description = req.Description,
                 PmId = req.PmId,
                 ClientName = req.ClientName?.Trim() ?? string.Empty,
-                TargetEndDate = req.TargetEndDate ?? DateTime.Now,
+                StartDate = req.StartDate,
+                TargetEndDate = req.TargetEndDate,
                 Status = req.Status ?? "ongoing",
                 CreatedDate = DateTime.Now
             };
@@ -167,11 +170,16 @@ namespace QtechOJT_Net9.Controllers
             if (project is null)
                 return NotFound(new { message = "Project not found" });
 
+            // Validate that TargetEndDate is >= StartDate
+            if (req.TargetEndDate < req.StartDate)
+                return BadRequest(new { message = "Target End Date must be equal to or after Start Date" });
+
             project.Title = req.Title.Trim();
             project.Description = req.Description;
             project.PmId = req.PmId;
             project.ClientName = req.ClientName?.Trim() ?? project.ClientName;
-            project.TargetEndDate = req.TargetEndDate ?? project.TargetEndDate;
+            project.StartDate = req.StartDate;
+            project.TargetEndDate = req.TargetEndDate;
             project.Status = req.Status ?? "ongoing";
 
             try
@@ -227,6 +235,7 @@ namespace QtechOJT_Net9.Controllers
                     Title = pu.Project.Title,
                     Description = pu.Project.Description,
                     ClientName = pu.Project.ClientName,
+                    StartDate = pu.Project.StartDate,
                     TargetEndDate = pu.Project.TargetEndDate,
                     Status = pu.Project.Status,
                     CreatedAt = pu.Project.CreatedDate,
